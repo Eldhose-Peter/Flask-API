@@ -249,9 +249,36 @@ def ret_urn(current_user):
     return jsonify({'message':'Book returned !'})
 
 
-#@app.route('/api/home/search',methods = ['GET'])
-#@token_required
-#def search(current_user):
+@app.route('/api/home/search',methods = ['GET'])
+@token_required
+def search(current_user):
+
+    data = request.get_json()
+
+    name = data['name']
+
+    try:
+    
+        cur = mysql.connection.cursor()
+        cur.execute("SELECT * from Books WHERE title LIKE '%"+name+"%'")
+        books= cur.fetchall()
+        cur.close()
+    
+    except:
+        return make_response('Error in sql Query', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
+
+    output=[]
+
+    for book in books:
+        book_data = {}
+        book_data['id'] = book['book_id']
+        book_data['title'] = book['title']
+        book_data['count'] = book['count']
+        output.append(book_data)
+
+    return jsonify({'Books' : output})
+    
+
 
 
 
